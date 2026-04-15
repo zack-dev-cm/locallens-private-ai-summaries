@@ -8,7 +8,7 @@ version = "0.1.2"
 description = "Chrome extension for local summaries, simplification, translation, and safe-share cleanup with Chrome built-in AI."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Zack" }]
 dependencies = []
 
@@ -17,3 +17,6 @@ dev = ["pytest>=8.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools]
+py-modules = []
