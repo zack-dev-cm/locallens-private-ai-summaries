@@ -39,6 +39,12 @@ python3 scripts/render_release_notes.py --manifest dist/launch-manifest.json --o
 - marketing assets: `marketing/`
 - release helpers: `scripts/`
 
+## Public Pages
+
+- homepage: https://zack-dev-cm.github.io/locallens/
+- support: https://zack-dev-cm.github.io/locallens/support/
+- privacy policy: https://zack-dev-cm.github.io/locallens/privacy/
+
 ## License
 
 MIT

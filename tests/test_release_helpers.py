@@ -46,8 +46,11 @@ def test_build_launch_manifest_points_to_locallens_repo(tmp_path: Path) -> None:
 
     payload = build_launch_manifest(repo_root)
     assert payload["repo_url"] == "https://github.com/zack-dev-cm/locallens-private-ai-summaries"
-    assert payload["support_url"].endswith("/issues")
-    assert payload["privacy_policy_url"].endswith("/docs/privacy-policy.md")
+    assert payload["homepage_url"] == "https://zack-dev-cm.github.io/locallens/"
+    assert payload["support_url"] == "https://zack-dev-cm.github.io/locallens/support/"
+    assert payload["privacy_policy_url"] == "https://zack-dev-cm.github.io/locallens/privacy/"
+    assert payload["test_instructions_url"] == "https://zack-dev-cm.github.io/locallens/support/#reviewer-checklist"
+    assert payload["portfolio"]["project_link"] == "https://zack-dev-cm.github.io/locallens/"
 
 
 def test_build_listing_payload_uses_repo_links(tmp_path: Path) -> None:

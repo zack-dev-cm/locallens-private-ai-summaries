@@ -7,20 +7,29 @@ from pathlib import Path
 from common import abs_path, dump_json, slugify
 
 
+PUBLIC_SITE_SLUG = "locallens"
+PUBLIC_SITE_BASE = f"https://zack-dev-cm.github.io/{PUBLIC_SITE_SLUG}/"
+
+
 def build_launch_manifest(repo_root: Path) -> dict:
     manifest = json.loads((repo_root / "extension" / "manifest.json").read_text(encoding="utf-8"))
     repo_name = repo_root.name
     extension_name = manifest["name"]
     repo_url = f"https://github.com/zack-dev-cm/{repo_name}"
     project_slug = slugify(extension_name)
+    homepage_url = PUBLIC_SITE_BASE
+    support_url = f"{PUBLIC_SITE_BASE}support/"
+    privacy_policy_url = f"{PUBLIC_SITE_BASE}privacy/"
+    test_instructions_url = f"{support_url}#reviewer-checklist"
     return {
         "repo_name": repo_name,
         "repo_url": repo_url,
+        "homepage_url": homepage_url,
         "github_description": "Chrome extension for local summaries, simplification, translation, and safe-share cleanup with Chrome built-in AI.",
-        "github_homepage": repo_url,
-        "support_url": f"{repo_url}/issues",
-        "privacy_policy_url": f"{repo_url}/blob/main/docs/privacy-policy.md",
-        "test_instructions_url": f"{repo_url}/blob/main/docs/test-instructions.md",
+        "github_homepage": homepage_url,
+        "support_url": support_url,
+        "privacy_policy_url": privacy_policy_url,
+        "test_instructions_url": test_instructions_url,
         "github_topics": [
             "chrome-extension",
             "chrome-web-store",
@@ -38,7 +47,7 @@ def build_launch_manifest(repo_root: Path) -> dict:
         "portfolio": {
             "title": extension_name,
             "slug": project_slug,
-            "project_link": f"https://zack-dev-cm.github.io/projects/{project_slug}.md",
+            "project_link": homepage_url,
         },
         "release": {
             "tag": f"v{manifest['version']}",
