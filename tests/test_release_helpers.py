@@ -1,0 +1,75 @@
+from __future__ import annotations
+
+import json
+import sys
+import time
+from pathlib import Path
+
+
+SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from generate_launch_manifest import build_launch_manifest  # noqa: E402
+from generate_listing_copy import build_listing_payload  # noqa: E402
+from generate_marketing_assets import asset_is_fresh  # noqa: E402
+
+
+def test_asset_is_fresh_tracks_source_updates(tmp_path: Path) -> None:
+    source = tmp_path / "marketing.html"
+    css = tmp_path / "marketing.css"
+    output = tmp_path / "out.png"
+    source.write_text("<html></html>", encoding="utf-8")
+    css.write_text("body{}", encoding="utf-8")
+    output.write_text("png", encoding="utf-8")
+    assert asset_is_fresh(output, [source, css]) is True
+
+    time.sleep(0.01)
+    css.write_text("body{color:red;}", encoding="utf-8")
+    assert asset_is_fresh(output, [source, css]) is False
+
+
+def test_build_launch_manifest_points_to_locallens_repo(tmp_path: Path) -> None:
+    repo_root = tmp_path / "locallens-private-ai-summaries"
+    extension_dir = repo_root / "extension"
+    extension_dir.mkdir(parents=True)
+    (extension_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "manifest_version": 3,
+                "name": "LocalLens: Private AI Summaries",
+                "version": "0.1.2",
+                "description": "Sample description",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_launch_manifest(repo_root)
+    assert payload["repo_url"] == "https://github.com/zack-dev-cm/locallens-private-ai-summaries"
+    assert payload["support_url"].endswith("/issues")
+    assert payload["privacy_policy_url"].endswith("/docs/privacy-policy.md")
+
+
+def test_build_listing_payload_uses_repo_links(tmp_path: Path) -> None:
+    repo_root = tmp_path / "locallens-private-ai-summaries"
+    extension_dir = repo_root / "extension"
+    extension_dir.mkdir(parents=True)
+    (extension_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "manifest_version": 3,
+                "name": "LocalLens: Private AI Summaries",
+                "version": "0.1.2",
+                "description": "Sample description",
+                "permissions": ["activeTab", "scripting"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    launch_manifest = build_launch_manifest(repo_root)
+    payload = build_listing_payload(repo_root, launch_manifest)
+
+    assert payload["privacy"]["privacy_policy_url"] == launch_manifest["privacy_policy_url"]
+    assert payload["support_url"] == launch_manifest["support_url"]
+    assert set(payload["privacy"]["permission_justifications"]) == {"activeTab", "scripting"}

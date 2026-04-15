@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LocalLens</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Private AI in Chrome</p>
+          <h1>LocalLens</h1>
+          <p class="tagline">
+            Turn any page into a local summary, rewrite, translation, or safe-share
+            brief without sending text to a server.
+          </p>
+        </div>
+        <div class="hero-mark" aria-hidden="true">
+          <span class="mark-ring"></span>
+          <span class="mark-dot"></span>
+        </div>
+      </section>
+
+      <section class="status-card">
+        <div>
+          <p class="status-label">Built-in AI status</p>
+          <p id="capability-status" class="status-value">Checking Chrome capabilities…</p>
+        </div>
+        <div id="download-status" class="download-status"></div>
+      </section>
+
+      <section class="controls">
+        <div class="control-header">
+          <h2>Actions</h2>
+          <label class="translate-label" for="target-language">
+            Translate to
+            <select id="target-language">
+              <option value="English">English</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Armenian">Armenian</option>
+              <option value="Russian">Russian</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="button-grid">
+          <button data-action="summarizePage">Summarize page</button>
+          <button data-action="summarizeSelection">Summarize selection</button>
+          <button data-action="simplifySelection">Simplify selection</button>
+          <button data-action="translateSelection">Translate selection</button>
+          <button data-action="safeShareSelection" class="accent">Safe-share selection</button>
+        </div>
+      </section>
+
+      <section class="source-card">
+        <div class="source-topline">
+          <p class="status-label">Source</p>
+          <p id="source-badge" class="source-badge">Waiting for action</p>
+        </div>
+        <p id="source-title" class="source-title">LocalLens reads from the active tab only after you click.</p>
+        <p id="source-meta" class="source-meta">No host permissions, no server round-trip, no background scraping.</p>
+      </section>
+
+      <section class="output-card">
+        <div class="output-header">
+          <h2>Result</h2>
+          <button id="copy-output" class="ghost">Copy</button>
+        </div>
+        <pre id="output" class="output" tabindex="0">Choose an action to start.</pre>
+      </section>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+  </html>

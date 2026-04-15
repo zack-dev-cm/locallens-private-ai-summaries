@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1400,height=560,initial-scale=1" />
+    <link rel="stylesheet" href="marketing.css" />
+    <style>
+      body {
+        width: 1400px;
+        height: 560px;
+        overflow: hidden;
+      }
+
+      .frame {
+        padding: 34px;
+      }
+
+      .card {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 28px;
+        padding: 34px;
+      }
+
+      .headline {
+        font-size: 58px;
+      }
+
+      .subline {
+        max-width: 620px;
+        font-size: 24px;
+      }
+
+      .hero-copy {
+        display: grid;
+        gap: 18px;
+        align-content: center;
+      }
+
+      .hero-panel {
+        border-radius: 28px;
+        border: 1px solid rgba(15, 143, 111, 0.12);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 247, 0.96));
+        box-shadow: 0 24px 48px rgba(17, 41, 34, 0.12);
+        padding: 26px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .mini-shell {
+        display: grid;
+        gap: 16px;
+      }
+
+      .mini-topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .mini-title {
+        margin: 0;
+        font-size: 28px;
+      }
+
+      .chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(15, 143, 111, 0.1);
+        color: var(--green-deep);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .result-card {
+        border-radius: 22px;
+        border: 1px solid rgba(15, 143, 111, 0.12);
+        background: rgba(255, 255, 255, 0.92);
+        padding: 20px;
+      }
+
+      .result-card h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+      }
+
+      .result-card ul {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="card">
+        <div class="hero-copy">
+          <div class="brand">
+            <div class="brand-mark"></div>
+            <div>
+              <p class="eyebrow">LocalLens</p>
+              <h1 class="headline">Private AI reading help built into Chrome</h1>
+            </div>
+          </div>
+          <p class="subline">
+            Summaries, simplification, translation, and safe-share cleanup for the active
+            tab, powered by Chrome built-in AI and triggered only after an explicit click.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Active tab only</span>
+            <span class="pill">No account</span>
+            <span class="pill">No server</span>
+            <span class="pill">Chrome built-in AI</span>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="mini-topline">
+            <div>
+              <p class="eyebrow">Popup flow</p>
+              <h2 class="mini-title">From page text to useful output</h2>
+            </div>
+            <span class="chip">Local processing</span>
+          </div>
+
+          <div class="mini-shell">
+            <div class="panel">
+              <h3>Actions</h3>
+              <div class="pill-row">
+                <span class="pill">Summarize page</span>
+                <span class="pill">Translate</span>
+                <span class="pill">Safe-share</span>
+              </div>
+            </div>
+
+            <div class="result-card">
+              <h2>Result example</h2>
+              <ul>
+                <li>Reads the active tab only after a click.</li>
+                <li>Generates fast bullet summaries for dense pages.</li>
+                <li>Can simplify or translate selected text without leaving Chrome.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>

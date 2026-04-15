@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1280,height=800,initial-scale=1" />
+    <link rel="stylesheet" href="marketing.css" />
+    <style>
+      body {
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+      }
+
+      .frame {
+        padding: 34px;
+      }
+
+      .card {
+        padding: 32px;
+        display: grid;
+        gap: 28px;
+      }
+
+      .top-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .headline {
+        font-size: 40px;
+      }
+
+      .subline {
+        max-width: 760px;
+      }
+
+      .workflow-grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 22px;
+      }
+
+      .panel {
+        min-height: 320px;
+      }
+
+      .selection-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .selection-card blockquote,
+      .selection-card pre {
+        margin: 0;
+        border-radius: 18px;
+        padding: 18px;
+        font: inherit;
+      }
+
+      .selection-card blockquote {
+        border: 1px solid rgba(15, 143, 111, 0.12);
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .selection-card pre {
+        border: 1px solid rgba(245, 191, 111, 0.22);
+        background: rgba(255, 247, 235, 0.92);
+        white-space: pre-wrap;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="card">
+        <div class="top-row">
+          <div>
+            <p class="eyebrow">Focused feature view</p>
+            <h1 class="headline">Clean selected text before you share it</h1>
+            <p class="subline">
+              LocalLens can simplify, translate, or redact sensitive strings from a selected
+              passage before generating a concise brief.
+            </p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Selection only</span>
+            <span class="pill">Redaction</span>
+            <span class="pill">Local AI</span>
+          </div>
+        </div>
+
+        <div class="workflow-grid">
+          <div class="panel selection-card">
+            <h3>Selected text</h3>
+            <blockquote>
+              Send the rollout summary to alex@example.com and include the staging URL
+              https://preview.example.com before Friday.
+            </blockquote>
+            <h3>Safe-share brief</h3>
+            <pre>Send the rollout summary to [REDACTED_EMAIL] and include the staging URL [REDACTED_URL] before Friday.</pre>
+          </div>
+
+          <div class="panel">
+            <h3>Why teams use it</h3>
+            <ul class="summary-list">
+              <li>Protects obvious emails, URLs, secrets, and long numeric strings before local processing.</li>
+              <li>Works from the active selection, so the extension stays narrow and predictable.</li>
+              <li>Lets users translate or simplify the same selected text from the same popup.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>
