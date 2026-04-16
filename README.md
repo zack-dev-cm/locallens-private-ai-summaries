@@ -12,9 +12,6 @@ This repo is the product home for LocalLens. It contains the extension source, C
 - translate selected text inside the popup
 - create a safe-share brief by masking obvious sensitive strings before local AI processing
 
-## Why This Repo Exists Separately
-
-LocalLens is a user-facing extension product. Its source, policy docs, screenshots, and release notes should not be bundled into an operator-facing publisher skill repo.
 
 ## Quick Start
 
