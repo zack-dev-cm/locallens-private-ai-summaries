@@ -1,0 +1,17 @@
+{
+  "name": "locallens-public-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build:public-site": "node public_site/scripts/generate-site-content.mjs",
+    "test": "npm run build:public-site && node --test extension/popup-helpers.test.js public_site/tests/routes.test.js && node public_site/tests/run-routes-check.js",
+    "dev:public-site": "npm run build:public-site && wrangler dev",
+    "deploy:public-site": "npm run build:public-site && wrangler deploy",
+    "dev": "npm run dev:public-site",
+    "deploy": "npm run deploy:public-site"
+  },
+  "devDependencies": {
+    "wrangler": "^4.52.0"
+  }
+}

@@ -1,0 +1,6 @@
+name = "locallens-public-site"
+main = "public_site/src/worker.js"
+compatibility_date = "2026-04-16"
+account_id = "b8260d05f5d92298f5e033e8ce7816b4"
+workers_dev = true
+observability = { enabled = true }

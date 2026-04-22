@@ -2,24 +2,60 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import re
+import subprocess
 from pathlib import Path
 
 from common import abs_path, dump_json, slugify
 
 
 PUBLIC_SITE_SLUG = "locallens"
-PUBLIC_SITE_BASE = f"https://zack-dev-cm.github.io/{PUBLIC_SITE_SLUG}/"
+DEFAULT_PUBLIC_SITE_BASE = "https://locallens-public-site.rapidapis.workers.dev/"
+GITHUB_REMOTE_RE = re.compile(
+    r"^(?:git@github\.com:|https://github\.com/)(?P<slug>[^/\s]+/[^/\s]+?)(?:\.git)?$"
+)
+
+
+def public_site_base() -> str:
+    override = os.environ.get("LOCALLENS_PUBLIC_SITE_BASE", "").strip()
+    if override:
+        return override.rstrip("/") + "/"
+    return DEFAULT_PUBLIC_SITE_BASE
+
+
+def canonical_repo_url(repo_root: Path) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            cwd=str(repo_root),
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except Exception:
+        completed = None
+
+    if completed and completed.returncode == 0:
+        remote = completed.stdout.strip()
+        match = GITHUB_REMOTE_RE.match(remote)
+        if match:
+            return f"https://github.com/{match.group('slug')}"
+
+    return f"https://github.com/zack-dev-cm/{repo_root.name}"
 
 
 def build_launch_manifest(repo_root: Path) -> dict:
     manifest = json.loads((repo_root / "extension" / "manifest.json").read_text(encoding="utf-8"))
     repo_name = repo_root.name
     extension_name = manifest["name"]
-    repo_url = f"https://github.com/zack-dev-cm/{repo_name}"
+    repo_url = canonical_repo_url(repo_root)
     project_slug = slugify(extension_name)
-    homepage_url = PUBLIC_SITE_BASE
-    support_url = f"{PUBLIC_SITE_BASE}support/"
-    privacy_policy_url = f"{PUBLIC_SITE_BASE}privacy/"
+    public_base = public_site_base()
+    homepage_url = public_base
+    support_url = f"{public_base}support/"
+    privacy_policy_url = f"{public_base}privacy/"
     test_instructions_url = f"{support_url}#reviewer-checklist"
     return {
         "repo_name": repo_name,

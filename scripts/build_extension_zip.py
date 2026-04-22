@@ -8,6 +8,17 @@ from common import abs_path
 
 
 SKIP_DIRS = {"__pycache__", ".DS_Store"}
+SKIP_SUFFIXES = (".test.js", ".spec.js")
+
+
+def should_package(path: Path, extension_dir: Path) -> bool:
+    if path.name in SKIP_DIRS:
+        return False
+    if any(part in SKIP_DIRS for part in path.relative_to(extension_dir).parts):
+        return False
+    if path.suffix.lower() in {".md"}:
+        return False
+    return not any(path.name.endswith(suffix) for suffix in SKIP_SUFFIXES)
 
 
 def main() -> None:
@@ -22,11 +33,7 @@ def main() -> None:
 
     with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(extension_dir.rglob("*")):
-            if path.name in SKIP_DIRS:
-                continue
-            if any(part in SKIP_DIRS for part in path.parts):
-                continue
-            if path.is_file():
+            if path.is_file() and should_package(path, extension_dir):
                 archive.write(path, path.relative_to(extension_dir))
 
     print(f"Wrote {out_path}")

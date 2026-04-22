@@ -1,3 +1,11 @@
+import {
+  clampText,
+  countWords,
+  extractSelectionContextFromCurrentPage,
+  redactSensitive,
+  shortUrl,
+} from "./popup-helpers.js";
+
 const outputEl = document.getElementById("output");
 const capabilityStatusEl = document.getElementById("capability-status");
 const downloadStatusEl = document.getElementById("download-status");
@@ -8,7 +16,21 @@ const copyButton = document.getElementById("copy-output");
 const translateSelect = document.getElementById("target-language");
 const actionButtons = [...document.querySelectorAll("[data-action]")];
 
-const MAX_TEXT_LENGTH = 12000;
+const LANGUAGE_NAMES = {
+  de: "German",
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  hy: "Armenian",
+  ru: "Russian",
+};
+
+const SUMMARY_OPTIONS = {
+  type: "key-points",
+  format: "plain-text",
+  length: "medium",
+  outputLanguage: "en",
+};
 
 const ACTIONS = {
   summarizePage: {
@@ -46,14 +68,9 @@ const ACTIONS = {
   translateSelection: {
     label: "Translated selection",
     source: "selection",
-    mode: "languageModel",
+    mode: "translator",
     prepareInput: (context) => context.text,
-    run: (context) =>
-      promptText({
-        systemPrompt:
-          "You are a precise translator. Preserve meaning and tone. Do not add commentary.",
-        userPrompt: `Translate the following text into ${translateSelect.value}. Preserve names, links, and formatting when possible.\n\n${context.text}`,
-      }),
+    run: (context) => translateText(context.text, getSelectedTargetLanguage()),
   },
   safeShareSelection: {
     label: "Safe-share brief",
@@ -144,7 +161,7 @@ async function refreshCapabilityStatus() {
 
   if (typeof globalThis.Summarizer !== "undefined") {
     try {
-      const availability = await Summarizer.availability();
+      const availability = await Summarizer.availability(SUMMARY_OPTIONS);
       checks.push(`Summarizer: ${availability}`);
     } catch (error) {
       checks.push(`Summarizer: ${error.name}`);
@@ -167,6 +184,20 @@ async function refreshCapabilityStatus() {
     checks.push("Prompt API: unavailable");
   }
 
+  if (typeof globalThis.Translator !== "undefined") {
+    try {
+      const availability = await Translator.availability({
+        sourceLanguage: "en",
+        targetLanguage: "es",
+      });
+      checks.push(`Translator: ${availability}`);
+    } catch (error) {
+      checks.push(`Translator: ${error.name}`);
+    }
+  } else {
+    checks.push("Translator: unavailable");
+  }
+
   capabilityStatusEl.textContent = checks.join(" • ");
 }
 
@@ -187,12 +218,20 @@ function renderSource({ badge, title, meta }) {
   sourceMetaEl.textContent = meta;
 }
 
+function getSelectedTargetLanguage() {
+  const code = translateSelect.value || "es";
+  return {
+    code,
+    name: LANGUAGE_NAMES[code] || code,
+  };
+}
+
 async function summarizeText(text, { context }) {
   if (typeof globalThis.Summarizer === "undefined") {
     throw new Error("Chrome built-in summarization is unavailable in this popup.");
   }
 
-  const availability = await Summarizer.availability();
+  const availability = await Summarizer.availability(SUMMARY_OPTIONS);
   if (availability === "unavailable") {
     throw new Error("Summarizer API is unavailable. Use Chrome 138+ with built-in AI enabled.");
   }
@@ -202,9 +241,7 @@ async function summarizeText(text, { context }) {
   }
 
   const summarizer = await Summarizer.create({
-    type: "key-points",
-    format: "plain-text",
-    length: "medium",
+    ...SUMMARY_OPTIONS,
     preference: "capability",
     monitor(monitor) {
       monitor.addEventListener("downloadprogress", (event) => {
@@ -214,18 +251,19 @@ async function summarizeText(text, { context }) {
     },
   });
 
-  const stream = summarizer.summarizeStreaming(text, { context });
-  let result = "";
-  for await (const chunk of stream) {
-    result = chunk;
-    outputEl.textContent = chunk;
+  try {
+    const stream = summarizer.summarizeStreaming(text, { context });
+    let result = "";
+    for await (const chunk of stream) {
+      result = chunk;
+      outputEl.textContent = chunk;
+    }
+    return result;
+  } finally {
+    if (typeof summarizer.destroy === "function") {
+      summarizer.destroy();
+    }
   }
-
-  if (typeof summarizer.destroy === "function") {
-    summarizer.destroy();
-  }
-
-  return result;
 }
 
 async function promptText({ systemPrompt, userPrompt }) {
@@ -251,18 +289,96 @@ async function promptText({ systemPrompt, userPrompt }) {
     },
   });
 
-  let result = "";
-  const stream = session.promptStreaming(userPrompt);
-  for await (const chunk of stream) {
-    result = chunk;
-    outputEl.textContent = chunk;
+  try {
+    let result = "";
+    const stream = session.promptStreaming(userPrompt);
+    for await (const chunk of stream) {
+      result = chunk;
+      outputEl.textContent = chunk;
+    }
+    return result;
+  } finally {
+    if (typeof session.destroy === "function") {
+      session.destroy();
+    }
+  }
+}
+
+async function translateText(text, targetLanguage) {
+  if (typeof globalThis.Translator === "undefined") {
+    throw new Error("Chrome Translator API is unavailable in this popup.");
   }
 
-  if (typeof session.destroy === "function") {
-    session.destroy();
+  const sourceLanguage = await detectSourceLanguage(text);
+  if (sourceLanguage === targetLanguage.code) {
+    return text;
   }
 
-  return result;
+  const availability = await Translator.availability({
+    sourceLanguage,
+    targetLanguage: targetLanguage.code,
+  });
+  if (availability === "unavailable") {
+    throw new Error(
+      `Translator API is unavailable for ${sourceLanguage} to ${targetLanguage.name}. Use Chrome 138+ with built-in AI enabled.`,
+    );
+  }
+
+  if (!navigator.userActivation.isActive) {
+    throw new Error("Chrome requires a direct click before starting a local translation session.");
+  }
+
+  const translator = await Translator.create({
+    sourceLanguage,
+    targetLanguage: targetLanguage.code,
+    monitor(monitor) {
+      monitor.addEventListener("downloadprogress", (event) => {
+        const percent = Math.round(event.loaded * 100);
+        setDownloadStatus(`Downloading local translation model… ${percent}%`);
+      });
+    },
+  });
+
+  try {
+    return await translator.translate(text);
+  } finally {
+    if (typeof translator.destroy === "function") {
+      translator.destroy();
+    }
+  }
+}
+
+async function detectSourceLanguage(text) {
+  if (typeof globalThis.LanguageDetector === "undefined") {
+    return "en";
+  }
+
+  try {
+    const availability = await LanguageDetector.availability();
+    if (availability === "unavailable") {
+      return "en";
+    }
+
+    const detector = await LanguageDetector.create({
+      monitor(monitor) {
+        monitor.addEventListener("downloadprogress", (event) => {
+          const percent = Math.round(event.loaded * 100);
+          setDownloadStatus(`Downloading local language detector… ${percent}%`);
+        });
+      },
+    });
+
+    try {
+      const results = await detector.detect(text);
+      return results.find((result) => result.confidence >= 0.5)?.detectedLanguage || "en";
+    } finally {
+      if (typeof detector.destroy === "function") {
+        detector.destroy();
+      }
+    }
+  } catch {
+    return "en";
+  }
 }
 
 async function getPageContext() {
@@ -280,8 +396,11 @@ async function getPageContext() {
 }
 
 async function getSelectionContext(includeRedaction) {
-  const [result] = await runInActiveTab(extractSelectionContext);
+  const [result] = await runInActiveTab(extractSelectionContextFromCurrentPage);
   const context = result?.result;
+  if (context?.blockedReason) {
+    throw new Error(context.blockedReason);
+  }
   if (!context?.text?.trim()) {
     throw new Error("No selected text found. Highlight text on the page first.");
   }
@@ -312,60 +431,6 @@ async function runInActiveTab(func) {
   });
 }
 
-function clampText(text) {
-  const normalized = (text || "").replace(/\s+/g, " ").trim();
-  return normalized.length > MAX_TEXT_LENGTH
-    ? `${normalized.slice(0, MAX_TEXT_LENGTH)}…`
-    : normalized;
-}
-
-function countWords(text) {
-  return (text || "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-}
-
-function shortUrl(url) {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname.replace(/^www\./, "");
-  } catch {
-    return "active tab";
-  }
-}
-
-function redactSensitive(text) {
-  const patterns = [
-    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
-    /\b(?:\+?\d[\d\s().-]{7,}\d)\b/g,
-    /\bhttps?:\/\/\S+\b/gi,
-    /\b(?:sk|ghp|gho|ghu|pat)_[A-Za-z0-9_\-]{12,}\b/g,
-    /\b[A-F0-9]{32,}\b/gi,
-    /\b(?:\d[ -]*?){13,19}\b/g,
-  ];
-
-  const labels = [
-    "[REDACTED_EMAIL]",
-    "[REDACTED_PHONE]",
-    "[REDACTED_URL]",
-    "[REDACTED_TOKEN]",
-    "[REDACTED_SECRET]",
-    "[REDACTED_NUMBER]",
-  ];
-
-  let count = 0;
-  let redacted = text;
-  patterns.forEach((pattern, index) => {
-    redacted = redacted.replace(pattern, () => {
-      count += 1;
-      return labels[index];
-    });
-  });
-
-  return { text: redacted, count };
-}
-
 function extractPageContext() {
   const primary = document.querySelector("article, main, [role='main']");
   const bodyText = primary?.innerText || document.body?.innerText || "";
@@ -373,27 +438,5 @@ function extractPageContext() {
     title: document.title,
     url: location.href,
     text: bodyText,
-  };
-}
-
-function extractSelectionContext() {
-  const selection = window.getSelection()?.toString().trim() || "";
-  let activeSelection = "";
-  const element = document.activeElement;
-  if (
-    element &&
-    (element.tagName === "TEXTAREA" ||
-      (element.tagName === "INPUT" &&
-        /^(?:text|search|url|tel|email|password)$/i.test(element.type)))
-  ) {
-    const start = element.selectionStart ?? 0;
-    const end = element.selectionEnd ?? 0;
-    activeSelection = element.value?.slice(start, end).trim() || "";
-  }
-
-  return {
-    title: document.title,
-    url: location.href,
-    text: selection || activeSelection,
   };
 }

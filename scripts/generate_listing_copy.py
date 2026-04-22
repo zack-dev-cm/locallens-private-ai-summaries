@@ -31,11 +31,16 @@ def build_permission_justifications(permissions: list[str]) -> dict[str, str]:
     return {permission: templates[permission] for permission in permissions if permission in templates}
 
 
+def repo_relative_path(repo_root: Path, path: Path) -> str:
+    return path.relative_to(repo_root).as_posix()
+
+
 def build_listing_payload(repo_root: Path, launch_manifest: dict) -> dict:
     permissions = load_json(repo_root / "extension" / "manifest.json").get("permissions", [])
     permission_justifications = build_permission_justifications(permissions)
     return {
         "name": launch_manifest["extension"]["name"],
+        "homepage_url": launch_manifest["homepage_url"],
         "short_description": "Local summaries, simplification, translation, and safe-share cleanup for the active tab using Chrome built-in AI.",
         "detailed_description": (
             "LocalLens helps you move through dense pages faster without routing tab text to an external server.\n\n"
@@ -77,19 +82,22 @@ def build_listing_payload(repo_root: Path, launch_manifest: dict) -> dict:
         },
         "support_url": launch_manifest["support_url"],
         "reviewer_instructions": [
-            "Use Chrome 138+ on desktop with built-in AI enabled.",
+            "Use Chrome 138+ on desktop with Chrome built-in AI enabled and available.",
+            "Open the LocalLens popup first and confirm the status line does not show Summarizer: unavailable, Prompt API: unavailable, or Translator: unavailable.",
             "Open a text-heavy page, click the LocalLens action, and run Summarize page.",
-            "Highlight text on a page, then run Summarize selection, Simplify selection, Translate selection, and Safe-share selection.",
+            "Highlight text on a page, then run Summarize selection, Simplify selection, and Safe-share selection.",
+            "Keep the same highlighted text selected, leave Translate to Spanish, run Translate selection, and confirm the result is in Spanish.",
             "If Chrome downloads a local model on first use, wait for the progress indicator in the popup to finish and rerun the action.",
+            "If an action fails immediately, re-check the popup status line and switch to a Chrome profile where the required built-in AI API is available.",
         ],
         "store_assets": {
-            "icon": str(repo_root / "extension" / "icons" / "icon128.png"),
+            "icon": repo_relative_path(repo_root, repo_root / "extension" / "icons" / "icon128.png"),
             "screenshots": [
-                str(repo_root / "dist" / "store-assets" / "locallens-store-screenshot-1.png"),
-                str(repo_root / "dist" / "store-assets" / "locallens-store-screenshot-2.jpg"),
+                repo_relative_path(repo_root, repo_root / "dist" / "store-assets" / "locallens-store-screenshot-1.png"),
+                repo_relative_path(repo_root, repo_root / "dist" / "store-assets" / "locallens-store-screenshot-2.jpg"),
             ],
-            "promo_small": str(repo_root / "dist" / "store-assets" / "locallens-promo-small.png"),
-            "promo_marquee": str(repo_root / "dist" / "store-assets" / "locallens-promo-marquee.jpg"),
+            "promo_small": repo_relative_path(repo_root, repo_root / "dist" / "store-assets" / "locallens-promo-small.png"),
+            "promo_marquee": repo_relative_path(repo_root, repo_root / "dist" / "store-assets" / "locallens-promo-marquee.jpg"),
         },
         "keywords": [
             "ai summary",

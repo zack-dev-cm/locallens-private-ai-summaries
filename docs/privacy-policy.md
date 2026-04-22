@@ -12,6 +12,8 @@ When the user clicks an action in the popup, LocalLens may access:
 - readable text from the current page
 - text the user has selected on the current page
 
+LocalLens does not process selections from password fields.
+
 LocalLens uses this information only to provide the user-facing feature the user requested, such as summarizing the page, simplifying selected text, translating selected text, or creating a safe-share brief.
 
 ## How Data Is Processed
@@ -32,6 +34,6 @@ The current version of LocalLens does not request the `storage` permission and d
 
 ## Contact
 
-For support or privacy questions, use the public issue tracker:
+For support or privacy questions, use the official support page:
 
-- <https://github.com/zack-dev-cm/locallens-private-ai-summaries/issues>
+- <https://locallens-public-site.rapidapis.workers.dev/support/>

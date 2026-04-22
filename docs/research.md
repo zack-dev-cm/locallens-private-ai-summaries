@@ -19,18 +19,6 @@
 - Store-listing docs require a real listing surface, screenshots, promo assets, privacy disclosures, and a clean metadata story.
 - Image docs require a 128x128 icon, at least one screenshot, and a 440x280 promo tile.
 
-## Local Machine Overlap
-
-The local scan found multiple adjacent repos already covering:
-
-- AI chat overlays
-- repo summarization
-- ChatGPT navigation/scrolling
-- developer-console tooling
-- general AI side-panel work
-
-That makes another broad "AI everything" assistant a weak launch candidate.
-
 ## Decision
 
 Build `LocalLens: Private AI Summaries`.
@@ -40,7 +28,7 @@ Why:
 - broad enough for non-developers
 - easy to explain in one sentence
 - clear privacy story: local only, no account, no server
-- minimal permission surface: `activeTab`, `scripting`, `storage`
+- minimal permission surface: `activeTab`, `scripting`
 - easy to show in screenshots and store copy
 - strong fit for Chrome's built-in AI trend without fighting crowded all-in-one copilot positioning
 
@@ -54,18 +42,16 @@ Why:
 
 ## Agent Surface
 
-The companion OpenClaw skill automates:
+The release helpers in this repo automate:
 
-- local extension inventory
 - packaging and marketing asset generation
-- leak scanning
-- store-copy generation
-- browser-driven Chrome Web Store submission
-- GitHub + ClawHub release artifact generation
+- launch-manifest and store-copy generation
+- privacy and reviewer-link synchronization
+- repeatable GitHub release collateral
 
 ## Sources
 
-- [Google I/O 2025 recap for AI on Chrome](https://developer.chrome.com/blog/io24-prompt-api-extensions)
+- [AI APIs are in stable and origin trials, with new Early Preview Program APIs](https://developer.chrome.com/blog/ai-api-updates-io25)
 - [AI challenge winners and built-in AI rollout context](https://developer.chrome.com/blog/ai-challenge-winners)
 - [The Prompt API](https://developer.chrome.com/docs/ai/prompt-api)
 - [Prompt API for Chrome extensions](https://developer.chrome.com/docs/extensions/ai/prompt-api)

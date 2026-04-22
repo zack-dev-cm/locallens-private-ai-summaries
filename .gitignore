@@ -2,4 +2,8 @@
 .pytest_cache/
 __pycache__/
 *.pyc
+*.egg-info/
 dist/
+node_modules/
+.wrangler/
+public_site/src/site-content.generated.js
